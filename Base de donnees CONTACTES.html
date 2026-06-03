@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Base de contacts</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f3;color:#1a1a1a;font-size:14px}
+
+/* LOGIN */
+#login-screen{position:fixed;inset:0;background:#f5f5f3;display:flex;align-items:center;justify-content:center;z-index:200}
+.login-card{background:#fff;border:1px solid #e5e5e5;border-radius:14px;padding:36px 32px;width:100%;max-width:380px;box-shadow:0 4px 24px rgba(0,0,0,0.07)}
+.login-logo{font-size:22px;font-weight:700;margin-bottom:4px}
+.login-sub{font-size:13px;color:#888;margin-bottom:28px}
+.login-group{margin-bottom:16px}
+.login-group label{display:block;font-size:12px;font-weight:600;color:#555;margin-bottom:6px}
+.login-group input{width:100%;padding:9px 12px;border:1px solid #e0e0e0;border-radius:8px;font-size:13px}
+.login-group input:focus{outline:none;border-color:#999}
+.login-error{background:#fff5f5;color:#c0392b;border:1px solid #f5c6cb;border-radius:8px;padding:9px 12px;font-size:12.5px;margin-bottom:14px;display:none}
+.login-btn{width:100%;padding:10px;background:#1a1a1a;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;margin-top:4px}
+.login-btn:hover{background:#333}
+.login-link{font-size:12px;color:#888;text-align:center;margin-top:14px;cursor:pointer;text-decoration:underline}
+.login-link:hover{color:#1a1a1a}
+
+/* NAV */
+.nav{background:#fff;border-bottom:1px solid #e5e5e5;padding:0 24px;display:flex;align-items:center;height:52px}
+.nav-logo{font-size:15px;font-weight:700;margin-right:24px;white-space:nowrap}
+.nav-tab{padding:0 14px;height:52px;display:flex;align-items:center;font-size:13px;color:#666;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap}
+.nav-tab:hover{color:#1a1a1a}
+.nav-tab.active{color:#1a1a1a;border-bottom-color:#1a1a1a;font-weight:500}
+.nav-tab.admin-only{display:none}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.user-badge{font-size:12px;color:#666;background:#f5f5f3;padding:4px 10px;border-radius:20px;border:1px solid #e5e5e5}
+.user-badge span{font-weight:600;color:#1a1a1a}
+.nav-icon-btn{font-size:13px;color:#666;cursor:pointer;padding:5px 9px;border-radius:6px;border:1px solid #e5e5e5;background:#fff;white-space:nowrap}
+.nav-icon-btn:hover{background:#f5f5f3}
+
+/* APP */
+.app-shell{display:none}
+.page{display:none;padding:24px}
+.page.active{display:block}
+
+/* BUTTONS */
+.btn{padding:8px 16px;border-radius:8px;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;border:1px solid #e0e0e0;background:#fff;color:#1a1a1a}
+.btn:hover{background:#f5f5f3}
+.btn-primary{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+.btn-primary:hover{background:#333}
+.btn-export{background:#e8f5e9;color:#1b5e20;border-color:#c8e6c9}
+.btn-export:hover{background:#c8e6c9}
+
+.export-menu-wrap{position:relative;display:inline-flex}
+.export-dropdown{display:none;position:absolute;top:38px;left:0;background:#fff;border:1px solid #dfe8df;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:50;min-width:180px;overflow:hidden}
+.export-dropdown.open{display:block}
+.export-option{width:100%;border:none;background:#fff;text-align:left;padding:10px 12px;font-size:13px;cursor:pointer;color:#1a1a1a}
+.export-option:hover{background:#f5f5f3}
+.view-hero-educateur{margin:12px auto 0;display:flex;justify-content:center;gap:8px;flex-wrap:wrap;max-width:520px}
+.view-hero-info{padding:3px 12px;border-radius:20px;font-size:12px;font-weight:600;background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.25);display:inline-flex;align-items:center;gap:4px;max-width:100%;white-space:normal}
+.view-hero-info-label{font-size:12px;color:#fff;font-weight:600}
+.view-hero-info-value{font-size:12px;color:#fff;font-weight:600;word-break:break-word}
+.btn-sm{padding:5px 9px;font-size:12px}
+.btn-danger{background:#fff5f5;color:#c0392b;border-color:#f5c6cb}
+.btn-danger:hover{background:#f5c6cb}
+.btn-view{background:#f0f4ff;color:#1a3a8f;border-color:#c5d3f5}
+.btn-view:hover{background:#dce6ff}
+.btn-warning{background:#fff8e1;color:#7c5a00;border-color:#ffe082}
+.btn-warning:hover{background:#fff0b3}
+
+/* TOOLBAR */
+.toolbar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+.search-wrap{flex:1;min-width:200px;position:relative}
+.search-wrap input{width:100%;padding:8px 10px 8px 32px;border:1px solid #e0e0e0;border-radius:8px;font-size:13px;background:#fff}
+.search-wrap input:focus{outline:none;border-color:#999}
+.search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#bbb;pointer-events:none}
+.voice-btn{height:34px;width:38px;border-radius:8px;border:1px solid #e0e0e0;background:#fff;cursor:pointer;font-size:16px;display:inline-flex;align-items:center;justify-content:center}
+.voice-btn:hover{background:#f5f5f3}
+.voice-btn.listening{background:#fff8e1;border-color:#ffe082}
+.voice-status{font-size:12px;color:#666;min-width:120px}
+select{padding:8px 10px;border:1px solid #e0e0e0;border-radius:8px;font-size:13px;background:#fff;cursor:pointer}
+select:focus{outline:none;border-color:#999}
+
+/* STATS */
+.stats-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:16px}
+.stat-card{background:#fff;border:1px solid #e5e5e5;border-radius:8px;padding:12px 14px}
+.stat-card.clickable{cursor:pointer;transition:.15s}
+.stat-card.clickable:hover{background:#fafafa;border-color:#cfcfcf;transform:translateY(-1px)}
+.stat-card.clickable.active{border-color:#1a1a1a;box-shadow:0 0 0 2px rgba(26,26,26,.08)}
+.stat-label{font-size:11px;color:#888;margin-bottom:4px}
+.stat-val{font-size:22px;font-weight:700}
+
+/* TABLE */
+.table-wrap{background:#fff;border:1px solid #e5e5e5;border-radius:10px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+thead{background:#fafafa}
+th{padding:10px 12px;text-align:left;font-weight:500;font-size:11.5px;color:#666;border-bottom:1px solid #e5e5e5;white-space:nowrap;cursor:pointer;user-select:none}
+th:hover{color:#1a1a1a}
+td{padding:9px 12px;border-bottom:1px solid #f0f0f0;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#fafafa}
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500;white-space:nowrap}
+.badge-auto{background:#e8f5e9;color:#1b5e20}
+.badge-aide{background:#fff8e1;color:#6d4c00}
+.badge-fauteuil{background:#e3f2fd;color:#0d3c6e}
+.badge-lit{background:#ffebee;color:#7f0000}
+.badge-resident{background:#f3e5f5;color:#4a148c}
+.badge-personnel{background:#e0f2f1;color:#004d40}
+.avatar{width:30px;height:30px;border-radius:50%;background:#e3f2fd;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#0d3c6e;flex-shrink:0}
+.name-cell{display:flex;align-items:center;gap:8px}
+.actions{display:flex;gap:4px;justify-content:flex-end}
+.empty{text-align:center;padding:48px;color:#999}
+
+/* MODAL */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:100;align-items:center;justify-content:center;padding:16px}
+.overlay.open{display:flex}
+.modal{background:#fff;border-radius:12px;width:100%;max-width:640px;max-height:92vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,0.14)}
+.modal-sm{max-width:420px}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid #e5e5e5;position:sticky;top:0;background:#fff;z-index:1}
+.modal-header h2{font-size:15px;font-weight:600}
+.modal-close{background:none;border:none;cursor:pointer;color:#888;font-size:18px;width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center}
+.modal-close:hover{background:#f5f5f3}
+.modal-body{padding:20px}
+.modal-footer{padding:14px 20px;border-top:1px solid #e5e5e5;display:flex;justify-content:flex-end;gap:8px;position:sticky;bottom:0;background:#fff}
+
+/* FORM */
+.form-section{margin-bottom:20px}
+.form-section-title{font-size:11px;font-weight:700;color:#aaa;letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid #f0f0f0}
+.form-section-title.locked{color:#ccc;display:flex;align-items:center;gap:6px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-group.full{grid-column:1/-1}
+label{font-size:11.5px;font-weight:500;color:#555}
+.form-group input,.form-group select{padding:8px 10px;border:1px solid #e0e0e0;border-radius:8px;font-size:13px;background:#fff}
+.form-group input:focus,.form-group select:focus{outline:none;border-color:#999}
+.form-group input[readonly]{background:#fafafa;color:#aaa;cursor:not-allowed}
+.locked-section{background:#fafafa;border:1px dashed #ddd;border-radius:8px;padding:12px 14px;display:flex;align-items:center;gap:10px;color:#aaa;font-size:12.5px;font-style:italic}
+
+/* VIEW MODAL */
+.view-hero{background:linear-gradient(135deg,#1a1a2e 0%,#16213e 60%,#0f3460 100%);padding:36px 28px 28px;border-radius:12px 12px 0 0;color:#fff;text-align:center}
+.view-hero-avatar{width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;margin:0 auto 16px;border:3px solid rgba(255,255,255,0.25)}
+.view-hero-name{font-size:36px;font-weight:800;letter-spacing:-0.5px;line-height:1.1;margin-bottom:8px}
+.view-hero-badges{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:10px}
+.view-badge{padding:3px 12px;border-radius:20px;font-size:12px;font-weight:600;background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.25)}
+.view-body{padding:24px}
+.view-section{margin-bottom:22px}
+.view-section-title{font-size:11px;font-weight:700;color:#aaa;letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid #f0f0f0}
+.view-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.view-field{background:#fafafa;border-radius:8px;padding:10px 12px}
+.view-field.full{grid-column:1/-1}
+.view-field-label{font-size:10.5px;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px}
+.view-field-value{font-size:13.5px;color:#1a1a1a;font-weight:500}
+.view-field-value.empty{color:#ccc;font-style:italic;font-weight:400}
+.view-info-banner{background:#f0f4ff;border:1px solid #c5d3f5;border-radius:8px;padding:10px 14px;font-size:12.5px;color:#1a3a8f;display:flex;align-items:center;gap:8px;margin-bottom:16px}
+
+
+.view-dropdown-bar{background:#fff;border:1px solid #e5e5e5;border-radius:10px;padding:10px 12px;margin-bottom:18px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.view-dropdown-bar label{font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.06em}
+.view-dropdown-bar select{min-width:220px;flex:1;max-width:360px;padding:8px 10px;border:1px solid #e0e0e0;border-radius:8px;background:#fff;font-size:13px;color:#1a1a1a}
+
+/* HISTORY */
+.history-detail{font-size:11.5px;line-height:1.45;max-width:360px}
+.hist-field{margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid #f0f0f0}
+.hist-field:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.hist-label{font-weight:700;color:#555}
+.hist-before{color:#9a3412;background:#fff7ed;padding:1px 4px;border-radius:4px}
+.hist-after{color:#166534;background:#f0fdf4;padding:1px 4px;border-radius:4px}
+
+/* USERS PAGE */
+.users-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.user-card{background:#fff;border:1px solid #e5e5e5;border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.user-avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0}
+.user-avatar.admin{background:#fff3e0;color:#e65100}
+.user-avatar.user{background:#e8eaf6;color:#283593}
+.user-info{flex:1}
+.user-name{font-size:14px;font-weight:600}
+.user-meta{font-size:12px;color:#888;margin-top:1px}
+.role-badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.role-admin{background:#fff3e0;color:#e65100;border:1px solid #ffe0b2}
+.role-user{background:#e8eaf6;color:#283593;border:1px solid #c5cae9}
+.self-badge{background:#f5f5f3;color:#888;padding:2px 7px;border-radius:20px;font-size:11px;margin-left:5px}
+
+/* GUIDE */
+.guide-section{background:#fff;border:1px solid #e5e5e5;border-radius:10px;margin-bottom:10px;overflow:hidden}
+.guide-header{display:flex;align-items:center;gap:10px;padding:14px 16px;cursor:pointer;user-select:none}
+.guide-header:hover{background:#fafafa}
+.guide-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.guide-title{flex:1;font-size:13.5px;font-weight:500}
+.guide-toggle{color:#aaa}
+.guide-body{padding:16px;display:none;border-top:1px solid #f0f0f0}
+.guide-body.open{display:block}
+.step{display:flex;gap:12px;margin-bottom:14px;align-items:flex-start}
+.step:last-child{margin-bottom:0}
+.step-num{width:22px;height:22px;border-radius:50%;background:#f5f5f3;border:1px solid #e0e0e0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#666;flex-shrink:0;margin-top:1px}
+.step-title{font-size:13px;font-weight:600;margin-bottom:3px}
+.step-desc{font-size:12.5px;color:#666;line-height:1.6}
+.tip{background:#e3f2fd;border-left:3px solid #1976d2;padding:10px 12px;font-size:12.5px;color:#0d3c6e;margin-top:10px;border-radius:0 6px 6px 0}
+.warn{background:#fff8e1;border-left:3px solid #f59e0b;padding:10px 12px;font-size:12.5px;color:#6d4c00;margin-top:10px;border-radius:0 6px 6px 0}
+.field-table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:8px}
+.field-table th{padding:7px 10px;text-align:left;font-weight:600;font-size:11.5px;color:#666;background:#fafafa;border-bottom:1px solid #e5e5e5}
+.field-table td{padding:7px 10px;border-bottom:1px solid #f0f0f0}
+.field-table tr:last-child td{border-bottom:none}
+.b-req{background:#e8f5e9;color:#1b5e20;padding:2px 7px;border-radius:20px;font-size:11px;font-weight:600}
+.b-opt{background:#f5f5f3;color:#666;padding:2px 7px;border-radius:20px;font-size:11px;font-weight:500}
+
+/* PASSWORD RECOVERY */
+.pwd-recovery-box{background:#f0f4ff;border:1px solid #c5d3f5;border-radius:8px;padding:14px 16px;margin-top:12px}
+.pwd-recovery-title{font-size:12px;font-weight:600;color:#1a3a8f;margin-bottom:6px}
+.pwd-hint{font-size:13px;color:#1a1a1a;background:#fff;border:1px solid #e0e0e0;border-radius:6px;padding:8px 10px;font-family:monospace;letter-spacing:.05em}
+
+/* PRO VIEW COMPACT + SCROLL */
+#view-overlay .modal{max-height:92vh;display:flex;flex-direction:column}
+#view-content{display:flex;flex-direction:column;min-height:0}
+#view-content .view-hero{flex:0 0 auto;padding:24px 24px 18px}
+#view-content .view-body{overflow-y:auto;max-height:52vh;padding-right:18px;scrollbar-width:thin}
+#view-content .view-body::-webkit-scrollbar{width:8px}
+#view-content .view-body::-webkit-scrollbar-thumb{background:#cfcfcf;border-radius:10px}
+#view-content .view-hero-avatar{display:none!important}
+.view-actions-inline{display:inline-flex;gap:5px;margin-left:8px;vertical-align:middle;flex-wrap:wrap}
+.mini-action{border:1px solid #ddd;background:#fff;border-radius:6px;padding:2px 6px;font-size:11px;cursor:pointer;text-decoration:none;color:#1a1a1a;display:inline-flex;align-items:center;gap:3px}
+.mini-action:hover{background:#f5f5f3}
+.favorite-btn{border:none;background:transparent;cursor:pointer;font-size:16px;margin-right:5px;vertical-align:middle}
+.notes-box{background:#fafafa;border:1px solid #eee;border-radius:8px;padding:10px;margin-bottom:8px}
+.note-date{font-size:11px;color:#888;margin-bottom:4px;font-weight:600}
+.note-text{font-size:13px;white-space:pre-wrap;line-height:1.45}
+.note-editor{width:100%;min-height:70px;border:1px solid #ddd;border-radius:8px;padding:8px;font-family:inherit;font-size:13px;resize:vertical;margin-top:8px}
+
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">📋 Base de contacts</div>
+    <div class="login-sub">Connectez-vous pour accéder à l'application</div>
+    <div class="login-error" id="login-error">Identifiants incorrects.</div>
+    <div class="login-group">
+      <label>Nom d'utilisateur</label>
+      <input type="text" id="login-user" placeholder="ex: admin" autocomplete="username">
+    </div>
+    <div class="login-group">
+      <label>Mot de passe</label>
+      <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="login-btn" onclick="doLogin()">Se connecter</button>
+    <div class="login-link" onclick="openRecovery()">🔑 Mot de passe oublié ?</div>
+    <p style="font-size:11px;color:#ccc;margin-top:12px;text-align:center">
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app-shell" id="app-shell">
+  <div class="nav">
+    <span class="nav-logo">📋 Base de contacts</span>
+    <div class="nav-tab active" onclick="showPage('db',this)">Contacts</div>
+    <div class="nav-tab admin-only" onclick="showPage('users',this)">👥 Utilisateurs</div>
+    <div class="nav-tab" onclick="showPage('history',this)">🕘 Historique</div><div class="nav-tab" onclick="showPage('guide',this)">Mode d'emploi</div>
+    <div class="nav-right">
+      <div class="user-badge" id="nav-user-badge">—</div>
+      <div class="nav-icon-btn" onclick="openMyAccount()">⚙️ Mon compte</div>
+      <div class="nav-icon-btn" onclick="doLogout()">Déconnexion</div>
+    </div>
+  </div>
+
+  <!-- CONTACTS PAGE -->
+  <div class="page active" id="page-db">
+    <div class="stats-bar">
+      <div class="stat-card clickable" id="card-total" onclick="quickTypeFilter('')" title="Afficher tous les contacts"><div class="stat-label">Total contacts</div><div class="stat-val" id="stat-total">0</div></div>
+      <div class="stat-card clickable" id="card-res" onclick="quickTypeFilter('Résident')" title="Afficher les résidents en un clic"><div class="stat-label">Résidents</div><div class="stat-val" id="stat-res">0</div></div>
+      <div class="stat-card clickable" id="card-pers" onclick="quickTypeFilter('Personnel')" title="Afficher le personnel en un clic"><div class="stat-label">Personnel</div><div class="stat-val" id="stat-pers">0</div></div>
+      <div class="stat-card clickable" id="card-autres" onclick="quickTypeFilter('Autres')" title="Afficher les autres contacts en un clic"><div class="stat-label">Autres</div><div class="stat-val" id="stat-autres">0</div></div>
+    </div>
+    <div class="toolbar">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="search" placeholder="Rechercher..." oninput="render()">
+      </div>
+      <button class="voice-btn" id="voice-btn-search" type="button" onclick="startVoiceSearch('search','render','voice-btn-search')" title="Recherche vocale">🎙️</button>
+      <select id="filter-type" onchange="render()">
+        <option value="">Tous les types</option>
+        <option>Résident</option><option>Personnel</option><option>Autres</option>
+      </select>
+      <select id="filter-unite" onchange="render()">
+        <option value="">Toutes les unités</option>
+      </select>
+      <select id="filter-mob" onchange="render()">
+        <option value="">Toute mobilité</option>
+        <option>Autonome</option><option>Aide</option><option>Fauteuil</option><option>Alité</option>
+      </select>
+      <div class="export-menu-wrap">
+        <button class="btn btn-export" onclick="toggleExportMenu()">⬇ Exporter ▾</button>
+        <div class="export-dropdown" id="export-menu">
+          <button class="export-option" onclick="exportExcel(); closeExportMenu()">📊 Excel</button>
+          <button class="export-option" onclick="exportPDF(); closeExportMenu()">📄 PDF</button>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="openModal()">＋ Nouveau</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th onclick="sortBy('nom')">Nom / Prénom ↕</th>
+            <th>Type</th>
+            <th onclick="sortBy('unite')">Unité ↕</th>
+            <th>Mobilité</th>
+            <th onclick="sortBy('ddn')">DDN ↕</th>
+            <th>Poste / Fonction</th>
+            <th>Téléphone</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="contacts-body"></tbody>
+      </table>
+      <div class="empty" id="empty-state" style="display:none">
+        <div style="font-size:36px;margin-bottom:8px">🗃️</div>Aucun contact trouvé
+      </div>
+    </div>
+  </div>
+
+  <!-- USERS PAGE -->
+  <div class="page" id="page-users">
+    <div class="users-header">
+      <div>
+        <h1 style="font-size:18px;font-weight:700;margin-bottom:4px">Gestion des utilisateurs</h1>
+        <p style="font-size:13px;color:#888">Créez et gérez les comptes d'accès</p>
+      </div>
+      <button class="btn btn-primary" onclick="openUserModal()">＋ Nouvel utilisateur</button>
+    </div>
+    <div id="users-list"></div>
+  </div>
+
+  <!-- GUIDE PAGE -->
+  <div class="page" id="page-guide">
+    <div style="max-width:720px">
+      <div style="margin-bottom:20px">
+        <h1 style="font-size:20px;font-weight:700;margin-bottom:4px">Mode d'emploi administrateur</h1>
+        <p style="color:#666;font-size:13px">Guide complet de l'application</p>
+      </div>
+      <div class="guide-section">
+        <div class="guide-header" onclick="toggleGuide(this)">
+          <div class="guide-icon" style="background:#e8f5e9;color:#1b5e20">＋</div>
+          <span class="guide-title">1. Ajouter / modifier un contact</span>
+          <span class="guide-toggle">▾</span>
+        </div>
+        <div class="guide-body open">
+          <div class="step"><div class="step-num">1</div><div><div class="step-title">Ouvrir le formulaire</div><div class="step-desc">Cliquer sur <strong>＋ Nouveau</strong> pour créer ou sur ✏️ pour modifier un contact existant.</div></div></div>
+          <div class="step"><div class="step-num">2</div><div><div class="step-title">Type : Résident ou Personnel</div><div class="step-desc">Si <strong>Personnel</strong> est sélectionné, la section Informations médicales est automatiquement masquée.</div></div></div>
+          <div class="step"><div class="step-num">3</div><div><div class="step-title">Bouton 👁 Afficher</div><div class="step-desc">Le 3e bouton ouvre une fiche de visualisation complète avec le nom en très grand en haut de page.</div></div></div>
+          <div class="tip">💡 Seuls les Administrateurs peuvent supprimer des contacts.</div>
+        </div>
+      </div>
+      <div class="guide-section">
+        <div class="guide-header" onclick="toggleGuide(this)">
+          <div class="guide-icon" style="background:#f0f4ff;color:#1a3a8f">👁</div>
+          <span class="guide-title">2. Fiche de visualisation contact</span>
+          <span class="guide-toggle">▾</span>
+        </div>
+        <div class="guide-body">
+          <div class="step"><div class="step-num">1</div><div><div class="step-title">Cliquer sur 👁</div><div class="step-desc">S'ouvre une fiche complète avec le Nom et Prénom affiché en très grand caractère en haut sur fond sombre.</div></div></div>
+          <div class="step"><div class="step-num">2</div><div><div class="step-title">Sections organisées</div><div class="step-desc">Identification, Localisation, Informations médicales (si Résident), Contact et représentation.</div></div></div>
+          <div class="step"><div class="step-num">3</div><div><div class="step-title">Accès rapide au formulaire</div><div class="step-desc">Un bouton ✏️ Modifier est disponible directement depuis la fiche de visualisation.</div></div></div>
+        </div>
+      </div>
+      <div class="guide-section">
+        <div class="guide-header" onclick="toggleGuide(this)">
+          <div class="guide-icon" style="background:#fff3e0;color:#e65100">🔑</div>
+          <span class="guide-title">3. Gestion des mots de passe</span>
+          <span class="guide-toggle">▾</span>
+        </div>
+        <div class="guide-body">
+          <div class="step"><div class="step-num">1</div><div><div class="step-title">Modifier son propre mot de passe</div><div class="step-desc">Cliquer sur <strong>⚙️ Mon compte</strong> dans la barre de navigation. Saisir l'ancien mot de passe, puis le nouveau (2 fois).</div></div></div>
+          <div class="step"><div class="step-num">2</div><div><div class="step-title">Récupération (écran de connexion)</div><div class="step-desc">Cliquer sur <strong>Mot de passe oublié ?</strong> sur l'écran de connexion. L'administrateur peut voir et réinitialiser les mots de passe.</div></div></div>
+          <div class="step"><div class="step-num">3</div><div><div class="step-title">Réinitialisation admin</div><div class="step-desc">Dans la page Utilisateurs, cliquer sur 🔑 à côté d'un compte pour voir et modifier son mot de passe.</div></div></div>
+          <div class="warn">⚠️ Notez bien les nouveaux mots de passe — ils sont stockés localement sans cryptage avancé.</div>
+        </div>
+      </div>
+      <div class="guide-section">
+        <div class="guide-header" onclick="toggleGuide(this)">
+          <div class="guide-icon" style="background:#e0f2f1;color:#004d40">👥</div>
+          <span class="guide-title">4. Gestion des utilisateurs (Admin)</span>
+          <span class="guide-toggle">▾</span>
+        </div>
+        <div class="guide-body">
+          <div class="step"><div class="step-num">1</div><div><div class="step-title">Créer un compte</div><div class="step-desc">Onglet <strong>👥 Utilisateurs</strong> visible uniquement par les administrateurs.</div></div></div>
+          <div class="step"><div class="step-num">2</div><div><div class="step-title">Rôles</div><div class="step-desc"><strong>Administrateur</strong> : accès complet, gestion comptes, suppression contacts.<br><strong>Utilisateur</strong> : consultation et modification uniquement.</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page" id="page-history">
+    <div style="margin-bottom:20px">
+      <h1 style="font-size:20px;font-weight:700">Historique des modifications</h1>
+      <p style="color:#666">Date, heure, utilisateur et comparaison avant/après</p>
+    </div>
+    <div class="toolbar">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="history-search" placeholder="Rechercher dans l’historique..." oninput="renderHistory()">
+      </div>
+      <button class="voice-btn" id="voice-btn-history" type="button" onclick="startVoiceSearch('history-search','renderHistory','voice-btn-history')" title="Recherche vocale dans l’historique">🎙️</button>
+      <span class="voice-status" id="voice-status"> </span>
+      <button class="btn btn-export" onclick="exportHistoryCSV()">⬇ Export historique CSV</button>
+      <button class="btn" onclick="toggleSelectAllHistory(this)">☑ Tout sélectionner</button>
+      <button class="btn btn-danger" onclick="deleteSelectedHistory()">🗑 Supprimer la sélection</button>
+      <button class="btn btn-danger" onclick="clearHistory()">🗑 Vider tout l’historique</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th style="width:42px">Sélection</th><th>Date</th><th>Utilisateur</th><th>Action</th><th>Avant / Après</th><th>Restauration</th></tr></thead>
+        <tbody id="history-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════ MODALS ═══════════════ -->
+
+<!-- CONTACT EDIT MODAL -->
+<div class="overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modal-title">Nouveau contact</h2>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-section">
+        <div class="form-section-title">Identification</div>
+        <div class="form-grid">
+          <div class="form-group"><label>Prénom *</label><input type="text" id="f-prenom" placeholder="Prénom"></div>
+          <div class="form-group"><label>Nom *</label><input type="text" id="f-nom" placeholder="Nom de famille"></div>
+          <div class="form-group"><label>Type *</label>
+            <select id="f-type" onchange="toggleMedSection()">
+              <option value="">— choisir —</option>
+              <option>Résident</option>
+              <option>Personnel</option>
+              <option>Autres</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Pers Descp</label><input type="text" id="f-persDescp" placeholder="Description personnelle"></div>
+        </div>
+      </div>
+      <div class="form-section" id="loc-section">
+        <div class="form-section-title">Localisation</div>
+        <div class="form-grid">
+          <div class="form-group"><label>Unité</label><input type="text" id="f-unite" placeholder="Ex: A, B..."></div>
+          <div class="form-group"><label id="lbl-chambre">Chambre No</label><input type="text" id="f-chambreNo" placeholder="Numéro de chambre"></div>
+        </div>
+      </div>
+      <!-- SECTION MEDICALE — masquée si Personnel -->
+      <div class="form-section" id="med-section">
+        <div class="form-section-title">Informations médicales</div>
+        <div class="form-grid">
+          <div class="form-group full"><label>Diagnostic</label><input type="text" id="f-diagnostic" placeholder="Diagnostic médical principal"></div>
+          <div class="form-group"><label>Dossier No</label><input type="text" id="f-dossierNo" placeholder="Ex: D-2024-001"></div>
+          <div class="form-group"><label>Mobilité</label>
+            <select id="f-mobilite"><option value="">— choisir —</option><option>Autonome</option><option>Aide</option><option>Fauteuil</option><option>Alité</option></select>
+          </div>
+          <div class="form-group"><label>Date de naissance</label><input type="date" id="f-ddn"></div>
+          <div class="form-group"><label>Matricule de l'éducateur</label><input type="text" id="f-educateurMatricule" placeholder="Entrer le matricule" oninput="fillEducateurFromMatricule()"></div>
+          <div class="form-group"><label>Éducateur</label><input type="text" id="f-educateur" placeholder="Nom de l'éducateur"></div>
+          <div class="form-group"><label>No de Poste</label><input type="text" id="f-educateurPoste" placeholder="No de poste"></div>
+          <div class="form-group"><label>Cellulaire</label><input type="text" id="f-educateurCellulaire" placeholder="Cellulaire"></div>
+          <div class="form-group full"><div id="educateur-info" style="font-size:12px;color:#666;background:#fafafa;border:1px solid #eee;border-radius:8px;padding:8px 10px;display:none"></div></div>
+        </div>
+      </div>
+      <!-- SECTION MEDICALE MASQUEE -->
+      <div class="form-section" id="med-locked" style="display:none">
+        <div class="form-section-title locked">Informations médicales <span style="font-size:11px;font-style:italic;font-weight:400">(non applicable — Personnel)</span></div>
+        <div class="locked-section">🚫 Cette section n'est pas disponible pour le type <strong style="margin-left:4px">Personnel</strong>.</div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title">Contact &amp; représentation</div>
+        <div class="form-grid">
+          <div class="form-group" id="grp-poste"><label>Poste / Fonction</label><input type="text" id="f-poste" placeholder="Poste ou fonction"></div>
+          <div class="form-group" id="grp-matricule"><label>Matricule</label><input type="text" id="f-matricule" placeholder="Matricule du personnel"></div>
+          <div class="form-group"><label>No Tél / Poste</label><input type="text" id="f-telPoste" placeholder="Ex: 4210 ou +1 514 000 0000"></div>
+          <div class="form-group" id="grp-cellulaire"><label id="lbl-cellulaire">Cellulaire personnel</label><input type="text" id="f-cellulaire" placeholder="Cellulaire personnel"></div>
+          <div class="form-group"><label>Représentant</label><input type="text" id="f-representant" placeholder="Représentant légal ou contact d'urgence"></div>
+          <div class="form-group full" id="grp-cell-rep"><label>Cellulaire représentant</label><input type="text" id="f-cellRepresentant" placeholder="Cellulaire du représentant"></div>
+          <div class="form-group full" id="grp-adresse"><label>Adresse</label><input type="text" id="f-adresse" placeholder="Adresse"></div>
+          <div class="form-group full" id="grp-courriel"><label>Courriel</label><input type="email" id="f-courriel" placeholder="adresse@exemple.com"></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal()">Annuler</button>
+      <button class="btn btn-primary" onclick="saveContact()">💾 Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONTACT VIEW MODAL -->
+<div class="overlay" id="view-overlay">
+  <div class="modal" style="max-width:580px;overflow:hidden">
+    <div id="view-content"></div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeView()">Fermer</button>
+      <button class="btn" onclick="printCurrentContactPDF()">📄 PDF</button>
+      <button class="btn btn-primary" id="view-edit-btn" onclick="switchToEdit()">✏️ Modifier</button>
+    </div>
+  </div>
+</div>
+
+<!-- USER MODAL (create/edit) -->
+<div class="overlay" id="user-modal-overlay">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h2 id="user-modal-title">Nouvel utilisateur</h2>
+      <button class="modal-close" onclick="closeUserModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid" style="grid-template-columns:1fr 1fr">
+        <div class="form-group"><label>Prénom *</label><input type="text" id="u-prenom" placeholder="Prénom" autocomplete="off"></div>
+        <div class="form-group"><label>Nom *</label><input type="text" id="u-nom" placeholder="Nom" autocomplete="off"></div>
+        <div class="form-group full"><label>Nom d'utilisateur *</label><input type="text" id="u-username" placeholder="ex: jean.dupont" autocomplete="off"></div>
+        <div class="form-group full"><label>Rôle *</label>
+          <select id="u-role"><option value="user">Utilisateur</option><option value="admin">Administrateur</option></select>
+        </div>
+      </div>
+      <div class="warn" style="margin-top:14px">⚠️ Mot de passe temporaire automatique : identique au nom d'utilisateur. L'utilisateur devra obligatoirement le changer à sa première connexion.</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeUserModal()">Annuler</button>
+      <button class="btn btn-primary" onclick="saveUser()">💾 Créer le compte</button>
+    </div>
+  </div>
+</div>
+
+<!-- MY ACCOUNT MODAL (change password) -->
+<div class="overlay" id="myaccount-overlay">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h2>⚙️ Mon compte</h2>
+      <button class="modal-close" onclick="closeMyAccount()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="myaccount-info" style="background:#fafafa;border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:13px"></div>
+      <div style="font-size:12px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px">Modifier le mot de passe</div>
+      <div class="form-group" style="margin-bottom:12px"><label>Mot de passe actuel *</label><input type="password" id="ma-old" placeholder="Mot de passe actuel"></div>
+      <div class="form-group" style="margin-bottom:12px"><label>Nouveau mot de passe *</label><input type="password" id="ma-new1" placeholder="Nouveau mot de passe (min. 6 car.)"></div>
+      <div class="form-group"><label>Confirmer le nouveau *</label><input type="password" id="ma-new2" placeholder="Répéter le nouveau mot de passe"></div>
+      <div id="ma-error" style="display:none;background:#fff5f5;color:#c0392b;border:1px solid #f5c6cb;border-radius:8px;padding:8px 12px;font-size:12.5px;margin-top:12px"></div>
+      <div id="ma-ok" style="display:none;background:#e8f5e9;color:#1b5e20;border:1px solid #c8e6c9;border-radius:8px;padding:8px 12px;font-size:12.5px;margin-top:12px">✅ Mot de passe modifié avec succès !</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeMyAccount()">Fermer</button>
+      <button class="btn btn-primary" onclick="changeMyPassword()">🔑 Modifier</button>
+    </div>
+  </div>
+</div>
+
+<!-- PASSWORD RECOVERY MODAL -->
+<div class="overlay" id="recovery-overlay">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h2>🔑 Récupération de mot de passe</h2>
+      <button class="modal-close" onclick="document.getElementById('recovery-overlay').classList.remove('open')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:#666;margin-bottom:16px">Entrez votre nom d'utilisateur pour afficher les informations de récupération.</p>
+      <div class="form-group" style="margin-bottom:12px"><label>Nom d'utilisateur</label><input type="text" id="rec-username" placeholder="ex: admin"></div>
+      <div id="rec-result" style="display:none"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="document.getElementById('recovery-overlay').classList.remove('open')">Fermer</button>
+      <button class="btn btn-primary" onclick="doRecovery()">Rechercher</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN RESET PASSWORD MODAL -->
+<div class="overlay" id="admin-pwd-overlay">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <h2>🔑 Réinitialiser le mot de passe</h2>
+      <button class="modal-close" onclick="document.getElementById('admin-pwd-overlay').classList.remove('open')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="admin-pwd-info" style="background:#fafafa;border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:13px"></div>
+      <div class="pwd-recovery-box">
+        <div class="pwd-recovery-title">🔒 Mot de passe protégé</div>
+        <div class="pwd-hint" id="admin-current-pwd">••••••••</div>
+        <div style="font-size:11px;color:#666;margin-top:8px">Le mot de passe n'est jamais visible pour les autres utilisateurs. L'administrateur peut seulement le réinitialiser.</div>
+      </div>
+      <div style="margin-top:16px;font-size:12px;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">Réinitialisation sécurisée</div>
+      <div class="warn" style="margin-top:0">⚠️ L’administrateur ne peut pas voir le mot de passe d’un utilisateur. Il peut seulement le réinitialiser. Le mot de passe temporaire sera automatiquement égal au nom d’utilisateur, puis l’utilisateur devra le changer à sa prochaine connexion.</div>
+      <div id="ap-error" style="display:none;background:#fff5f5;color:#c0392b;border:1px solid #f5c6cb;border-radius:8px;padding:8px 12px;font-size:12.5px;margin-top:12px"></div>
+      <div id="ap-ok" style="display:none;background:#e8f5e9;color:#1b5e20;border:1px solid #c8e6c9;border-radius:8px;padding:8px 12px;font-size:12.5px;margin-top:12px">✅ Mot de passe réinitialisé au nom d’utilisateur. Changement obligatoire activé.</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="document.getElementById('admin-pwd-overlay').classList.remove('open')">Fermer</button>
+      <button class="btn btn-primary" onclick="adminResetPwd()">🔐 Réinitialiser au nom d’utilisateur</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+// ═══ DATA ROBUSTE ═══
+let contacts = [];
+let appUsers = [];
+let historyLog = [];
+let currentUser = null;
+let editingId = null;
+let viewingId = null;
+let adminPwdUserId = null;
+let sortField = null;
+let sortAsc = true;
+
+const CONTACTS_KEY = 'contacts_db';
+const USERS_KEY = 'app_users';
+const HISTORY_KEY = 'contacts_history';
+const FAVORITES_KEY = 'contacts_favorites';
+const NOTES_KEY = 'contacts_notes';
+
+function safeJSON(key, fallback){
+  try{ const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; }
+  catch(e){ return fallback; }
+}
+function saveC(){ localStorage.setItem(CONTACTS_KEY, JSON.stringify(contacts)); }
+function saveU(){ localStorage.setItem(USERS_KEY, JSON.stringify(appUsers)); }
+function saveH(){ localStorage.setItem(HISTORY_KEY, JSON.stringify(historyLog)); }
+function clone(obj){ return obj ? JSON.parse(JSON.stringify(obj)) : null; }
+function esc(v){ return String(v ?? '').replace(/[&<>'"]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m])); }
+function displayUser(){ return currentUser ? (currentUser.fullname || currentUser.username) : 'Inconnu'; }
+
+function startVoiceSearch(inputId, callbackName, buttonId){
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const status = document.getElementById('voice-status');
+  const btn = document.getElementById(buttonId);
+  if(!SpeechRecognition){
+    alert("Reconnaissance vocale non disponible sur ce navigateur. Essayez avec Google Chrome ou Microsoft Edge.");
+    return;
+  }
+  const input = document.getElementById(inputId);
+  if(!input) return;
+  const recognition = new SpeechRecognition();
+  recognition.lang = 'fr-CA';
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+  if(status) status.textContent = '🎙️ Écoute...';
+  if(btn) btn.classList.add('listening');
+  recognition.onresult = function(event){
+    const texte = event.results[0][0].transcript || '';
+    input.value = texte.trim();
+    if(callbackName && typeof window[callbackName] === 'function') window[callbackName]();
+    if(status) status.textContent = '✅ Recherche vocale effectuée';
+  };
+  recognition.onerror = function(){
+    if(status) status.textContent = '❌ Micro non disponible ou permission refusée';
+  };
+  recognition.onend = function(){
+    if(btn) btn.classList.remove('listening');
+    setTimeout(()=>{ if(status) status.textContent=' '; }, 2500);
+  };
+  recognition.start();
+}
+
+const fieldLabels = {
+  prenom:'Prénom', nom:'Nom', type:'Type', persDescp:'Pers Descp', unite:'Unité', diagnostic:'Diagnostic', dossierNo:'Dossier No', mobilite:'Mobilité', chambreNo:'Chambre No / No de poste', ddn:'Date de naissance', educateurMatricule:"Matricule de l'éducateur", educateur:'Éducateur', educateurPoste:'No de poste éducateur', educateurCellulaire:'Cellulaire éducateur', poste:'Poste / fonction', telPoste:'No tél / poste', cellulaire:'Cellulaire personnel', representant:'Représentant', cellRepresentant:'Cellulaire représentant', matricule:'Matricule', adresse:'Adresse', courriel:'Courriel', username:"Nom d'utilisateur", prenomUser:'Prénom utilisateur', nomUser:'Nom utilisateur', role:'Rôle', fullname:'Nom complet', mustChangePassword:'Changement mot de passe obligatoire'
+};
+const trackedContactFields = ['prenom','nom','type','persDescp','unite','diagnostic','dossierNo','mobilite','chambreNo','ddn','educateurMatricule','educateur','educateurPoste','educateurCellulaire','poste','telPoste','cellulaire','representant','cellRepresentant','matricule','adresse','courriel'];
+const trackedUserFields = ['prenomUser','nomUser','username','role','fullname','mustChangePassword'];
+function fieldDiff(before, after, fields){
+  const out=[];
+  fields.forEach(f=>{
+    const b = before ? (before[f] ?? '') : '';
+    const a = after ? (after[f] ?? '') : '';
+    if(String(b)!==String(a)) out.push({champ: fieldLabels[f]||f, avant:b||'—', apres:a||'—'});
+  });
+  return out;
+}
+
+function sanitizeForHistory(obj){
+  if(!obj) return null;
+  const copy=clone(obj);
+  if(Object.prototype.hasOwnProperty.call(copy,'password')) copy.password='••••••••';
+  return copy;
+}
+function logHistory(action, section, before, after, details){
+  historyLog.push({
+    id: 'h'+Date.now()+Math.random().toString(16).slice(2),
+    timestamp: new Date().toISOString(),
+    date: new Date().toLocaleDateString('fr-CA'),
+    heure: new Date().toLocaleTimeString('fr-CA'),
+    utilisateur: displayUser(),
+    username: currentUser?.username || 'inconnu',
+    section, action,
+    cible: after ? `${after.nom||after.fullname||after.username||''} ${after.prenom||''}`.trim() : (before ? `${before.nom||before.fullname||before.username||''} ${before.prenom||''}`.trim() : ''),
+    avant: sanitizeForHistory(before), apres: sanitizeForHistory(after), details: details || []
+  });
+  saveH(); renderHistory();
+}
+
+function initData(){
+  appUsers = safeJSON(USERS_KEY, null);
+  contacts = safeJSON(CONTACTS_KEY, null);
+  historyLog = safeJSON(HISTORY_KEY, []);
+  if(!Array.isArray(appUsers) || !appUsers.length){
+    appUsers=[{id:'u1',username:'admin',password:'admin123',role:'admin',prenomUser:'',nomUser:'',fullname:'Administrateur',mustChangePassword:false,created:Date.now()}]; saveU();
+  }
+  else{
+    let changedUsers=false;
+    appUsers=appUsers.map(u=>{
+      if(typeof u.mustChangePassword==='undefined'){ u.mustChangePassword=false; changedUsers=true; }
+      if(typeof u.prenomUser==='undefined'){ u.prenomUser=''; changedUsers=true; }
+      if(typeof u.nomUser==='undefined'){ u.nomUser=''; changedUsers=true; }
+      if(!u.fullname){ u.fullname=[u.prenomUser,u.nomUser].filter(Boolean).join(' ') || u.username; changedUsers=true; }
+      return u;
+    });
+    if(changedUsers) saveU();
+  }
+  if(!Array.isArray(contacts) || !contacts.length){
+    contacts=[
+      {id:1,prenom:'Marie',nom:'Dupont',type:'Résident',persDescp:'Long séjour',unite:'A',diagnostic:'AVC ischémique',dossierNo:'D-2024-001',mobilite:'Fauteuil',chambreNo:'A12',ddn:'1942-03-15',poste:'',telPoste:'',cellulaire:'',representant:'Pierre Dupont',cellRepresentant:'',matricule:'',adresse:'',courriel:''},
+      {id:2,prenom:'Jean',nom:'Martin',type:'Résident',persDescp:'Réadaptation',unite:'B',diagnostic:'Fracture hanche',dossierNo:'D-2024-015',mobilite:'Aide',chambreNo:'B07',ddn:'1938-11-22',poste:'',telPoste:'',cellulaire:'',representant:'Lucie Martin',cellRepresentant:'',matricule:'',adresse:'',courriel:''},
+      {id:3,prenom:'Suzanne',nom:'Bernard',type:'Personnel',persDescp:'Soins',unite:'A',diagnostic:'',dossierNo:'',mobilite:'',chambreNo:'4210',ddn:'',poste:'Infirmière',telPoste:'4210',cellulaire:'',representant:'',cellRepresentant:'',matricule:'',adresse:'',courriel:''}
+    ]; saveC();
+  }
+}
+
+// ═══ AUTH ═══
+function doLogin(){
+  const u=document.getElementById('login-user').value.trim();
+  const p=document.getElementById('login-pass').value;
+  const found=appUsers.find(x=>x.username===u&&x.password===p);
+  if(!found){document.getElementById('login-error').style.display='block';return;}
+  document.getElementById('login-error').style.display='none';
+  currentUser=found;
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app-shell').style.display='block';
+  document.getElementById('nav-user-badge').innerHTML=`<span>${esc(currentUser.fullname||currentUser.username)}</span> · ${currentUser.role==='admin'?'Admin':'Utilisateur'}`;
+  document.querySelectorAll('.admin-only').forEach(el=>el.style.display=currentUser.role==='admin'?'flex':'none');
+  render(); renderUsers(); renderHistory();
+  if(currentUser.mustChangePassword){ openMandatoryPasswordChange(); }
+}
+function doLogout(){
+  currentUser=null;
+  document.getElementById('app-shell').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('login-user').value=''; document.getElementById('login-pass').value='';
+  document.querySelectorAll('.admin-only').forEach(el=>el.style.display='none');
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelector('.nav-tab').classList.add('active');
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-db').classList.add('active');
+}
+
+// ═══ PASSWORD ═══
+function openMyAccount(){
+  document.getElementById('myaccount-info').innerHTML=`<strong>${esc(currentUser.fullname||currentUser.username)}</strong><br><span style="font-size:12px;color:#888">@${esc(currentUser.username)} · ${currentUser.role==='admin'?'Administrateur':'Utilisateur'}</span>${currentUser.mustChangePassword?'<div class="warn" style="margin-top:10px">⚠️ Vous devez changer votre mot de passe avant de continuer.</div>':''}`;
+  ['ma-old','ma-new1','ma-new2'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('ma-error').style.display='none'; document.getElementById('ma-ok').style.display='none';
+  document.getElementById('myaccount-overlay').classList.add('open');
+}
+function openMandatoryPasswordChange(){
+  openMyAccount();
+  const overlay=document.getElementById('myaccount-overlay');
+  overlay.setAttribute('data-mandatory','1');
+  const closeBtn=overlay.querySelector('.modal-close'); if(closeBtn) closeBtn.style.display='none';
+  const footerClose=overlay.querySelector('.modal-footer .btn'); if(footerClose) footerClose.style.display='none';
+}
+function closeMyAccount(){
+  if(currentUser?.mustChangePassword){ alert('Vous devez modifier votre mot de passe avant de continuer.'); return; }
+  document.getElementById('myaccount-overlay').classList.remove('open');
+}
+function changeMyPassword(){
+  const old=document.getElementById('ma-old').value, n1=document.getElementById('ma-new1').value, n2=document.getElementById('ma-new2').value;
+  const err=document.getElementById('ma-error'), ok=document.getElementById('ma-ok'); err.style.display='none'; ok.style.display='none';
+  if(old!==currentUser.password){err.textContent='Mot de passe actuel incorrect.';err.style.display='block';return;}
+  if(n1.length<6){err.textContent='Le nouveau mot de passe doit contenir au moins 6 caractères.';err.style.display='block';return;}
+  if(n1!==n2){err.textContent='Les deux nouveaux mots de passe ne correspondent pas.';err.style.display='block';return;}
+  if(n1===currentUser.username){err.textContent="Le nouveau mot de passe ne doit pas être identique au nom d'utilisateur.";err.style.display='block';return;}
+  if(n1===old){err.textContent='Le nouveau mot de passe doit être différent du mot de passe temporaire ou actuel.';err.style.display='block';return;}
+  const idx=appUsers.findIndex(u=>u.id===currentUser.id); const before=clone(appUsers[idx]);
+  appUsers[idx].password=n1; appUsers[idx].mustChangePassword=false; currentUser=appUsers[idx]; saveU();
+  logHistory('MODIFICATION MOT DE PASSE','Utilisateur',before,clone(appUsers[idx]),[{champ:'Mot de passe',avant:'Protégé',apres:'Modifié'},{champ:'Changement obligatoire',avant:before.mustChangePassword?'Oui':'Non',apres:'Non'}]);
+  ok.style.display='block'; ['ma-old','ma-new1','ma-new2'].forEach(id=>document.getElementById(id).value='');
+  const overlay=document.getElementById('myaccount-overlay'); overlay.removeAttribute('data-mandatory');
+  const closeBtn=overlay.querySelector('.modal-close'); if(closeBtn) closeBtn.style.display='flex';
+  const footerClose=overlay.querySelector('.modal-footer .btn'); if(footerClose) footerClose.style.display='inline-flex';
+  renderUsers();
+}
+function openRecovery(){document.getElementById('rec-username').value='';document.getElementById('rec-result').style.display='none';document.getElementById('recovery-overlay').classList.add('open');}
+function doRecovery(){
+  const uname=document.getElementById('rec-username').value.trim(); const div=document.getElementById('rec-result'); const found=appUsers.find(u=>u.username===uname);
+  if(!found){div.innerHTML='<div style="background:#fff5f5;color:#c0392b;border:1px solid #f5c6cb;border-radius:8px;padding:8px 12px;font-size:12.5px">Utilisateur introuvable.</div>';div.style.display='block';return;}
+  div.innerHTML=`<div class="pwd-recovery-box"><div class="pwd-recovery-title">Compte trouvé : ${esc(found.fullname||found.username)}</div><div style="font-size:12px;color:#666;margin-bottom:8px">Veuillez contacter un administrateur pour réinitialiser votre mot de passe.</div><div style="font-size:11px;color:#aaa">Identifiant : @${esc(found.username)}</div></div>`; div.style.display='block';
+}
+function openAdminPwd(uid){
+  const u=appUsers.find(x=>x.id===uid); if(!u)return; adminPwdUserId=uid;
+  document.getElementById('admin-pwd-info').innerHTML=`<strong>${esc(u.fullname||u.username)}</strong><br><span style="font-size:12px;color:#888">@${esc(u.username)} · ${u.role==='admin'?'Administrateur':'Utilisateur'}</span><br><span style="font-size:12px;color:#888">Mot de passe temporaire de réinitialisation : identique au nom d’utilisateur</span>`;
+  document.getElementById('admin-current-pwd').textContent='••••••••';
+  document.getElementById('ap-error').style.display='none'; document.getElementById('ap-ok').style.display='none';
+  document.getElementById('admin-pwd-overlay').classList.add('open');
+}
+function adminResetPwd(){
+  const err=document.getElementById('ap-error'), ok=document.getElementById('ap-ok'); err.style.display='none'; ok.style.display='none';
+  const idx=appUsers.findIndex(u=>u.id===adminPwdUserId);
+  if(idx<0){err.textContent='Utilisateur introuvable.'; err.style.display='block'; return;}
+  const before=clone(appUsers[idx]);
+  appUsers[idx].password=appUsers[idx].username;
+  appUsers[idx].mustChangePassword=true;
+  if(currentUser&&currentUser.id===adminPwdUserId) currentUser=appUsers[idx];
+  saveU();
+  document.getElementById('admin-current-pwd').textContent='••••••••'; ok.style.display='block'; renderUsers();
+  logHistory('RÉINITIALISATION MOT DE PASSE','Utilisateur',before,clone(appUsers[idx]),[{champ:'Mot de passe',avant:'Protégé',apres:"Réinitialisé au nom d’utilisateur"},{champ:'Changement obligatoire',avant:before.mustChangePassword?'Oui':'Non',apres:'Oui'}]);
+}
+
+// ═══ CONTACTS ═══
+function typeBadge(t){return t?`<span class="badge badge-${t==='Résident'?'resident':'personnel'}">${esc(t)}</span>`:'—';}
+function mobBadge(m){const map={Autonome:'auto',Aide:'aide',Fauteuil:'fauteuil','Alité':'lit'};return m?`<span class="badge badge-${map[m]||'auto'}">${esc(m)}</span>`:'—';}
+function fmtDate(d){if(!d)return '—';const[y,mo,da]=d.split('-');return`${da}.${mo}.${y}`;}
+function calcAge(d){if(!d)return '';const birth=new Date(d+'T00:00:00');if(isNaN(birth))return '';const today=new Date();let age=today.getFullYear()-birth.getFullYear();const m=today.getMonth()-birth.getMonth();if(m<0||(m===0&&today.getDate()<birth.getDate()))age--;return age>=0?age:'';}
+function fmtDateAge(d){const fd=fmtDate(d);const a=calcAge(d);return fd==='—'?'—':`${fd}${a!==''?' ('+a+' ans)':''}`;}
+function initials(p,n){return((p||'?')[0]+(n||'?')[0]).toUpperCase();}
+function findEducateurByMatricule(matricule){
+  const m=String(matricule||'').trim().toLowerCase();
+  if(!m) return null;
+  return contacts.find(c=>c.type==='Personnel' && String(c.matricule||'').trim().toLowerCase()===m) || null;
+}
+function fillEducateurFromMatricule(){
+  const matEl=document.getElementById('f-educateurMatricule');
+  if(!matEl) return;
+  const info=document.getElementById('educateur-info');
+  const m=matEl.value.trim();
+  const found=findEducateurByMatricule(m);
+  if(found){
+    document.getElementById('f-educateur').value=`${found.prenom||''} ${found.nom||''}`.trim();
+    document.getElementById('f-educateurPoste').value=found.telPoste||found.chambreNo||'';
+    document.getElementById('f-educateurCellulaire').value=found.cellulaire||'';
+    if(info){ info.style.display='block'; info.innerHTML=`✅ Éducateur trouvé : <strong>${esc(found.prenom||'')} ${esc(found.nom||'')}</strong> · No de poste : <strong>${esc(found.telPoste||found.chambreNo||'—')}</strong> · Cellulaire : <strong>${esc(found.cellulaire||'—')}</strong>`; }
+  }else{
+    if(info){
+      info.style.display=m?'block':'none';
+      info.innerHTML=m?"⚠️ Aucun éducateur trouvé avec ce matricule. Vous pouvez écrire les informations manuellement.":'';
+    }
+  }
+}
+function toggleMedSection(){
+  const t=document.getElementById('f-type').value;
+  const isPersonnel=t==='Personnel';
+  const isResident=t==='Résident';
+  const isAutres=t==='Autres';
+
+  // Localisation : cachée pour Autres seulement
+  const loc=document.getElementById('loc-section');
+  if(loc) loc.style.display=isAutres?'none':'block';
+
+  // Informations médicales : seulement pour Résident
+  document.getElementById('med-section').style.display=isResident?'block':'none';
+  document.getElementById('med-locked').style.display=isResident?'none':'block';
+  const lockedTitle=document.querySelector('#med-locked .form-section-title');
+  const lockedText=document.querySelector('#med-locked .locked-section');
+  if(lockedTitle) lockedTitle.innerHTML='Informations médicales <span style="font-size:11px;font-style:italic;font-weight:400">(non applicable — '+(t||'ce type')+')</span>';
+  if(lockedText) lockedText.innerHTML="🚫 Cette section n'est pas disponible pour le type <strong style='margin-left:4px'>"+esc(t||'sélectionné')+"</strong>.";
+
+  const lbl=document.getElementById('lbl-chambre'), input=document.getElementById('f-chambreNo');
+  if(lbl&&input){
+    lbl.textContent=isPersonnel?'No de poste':'Chambre No';
+    input.placeholder=isPersonnel?'Numéro de poste':'Numéro de chambre';
+  }
+
+  const repCell=document.getElementById('grp-cell-rep'), rep=document.getElementById('f-representant')?.closest('.form-group');
+  if(repCell) repCell.style.display=isResident?'flex':'none';
+  if(rep) rep.style.display=isResident?'flex':'none';
+
+  const mat=document.getElementById('grp-matricule');
+  if(mat) mat.style.display=isPersonnel?'flex':'none';
+
+  const adr=document.getElementById('grp-adresse');
+  if(adr) adr.style.display=isAutres?'flex':'none';
+
+  // Courriel : pour Personnel et Autres
+  const cour=document.getElementById('grp-courriel');
+  if(cour) cour.style.display=(isPersonnel||isAutres)?'flex':'none';
+}
+function quickTypeFilter(type){
+  const sel=document.getElementById('filter-type');
+  if(sel) sel.value=type||'';
+  const search=document.getElementById('search');
+  if(search) search.value='';
+  const unite=document.getElementById('filter-unite');
+  if(unite) unite.value='';
+  const mob=document.getElementById('filter-mob');
+  if(mob) mob.value='';
+  render();
+}
+function updateStatCardsActive(type){
+  const map={'':'card-total','Résident':'card-res','Personnel':'card-pers','Autres':'card-autres'};
+  ['card-total','card-res','card-pers','card-autres'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.classList.toggle('active', map[type||'']===id);
+  });
+}
+
+function getFavorites(){ return safeJSON(FAVORITES_KEY, []); }
+function saveFavorites(list){ localStorage.setItem(FAVORITES_KEY, JSON.stringify(list)); }
+function isFavorite(id){ return getFavorites().includes(String(id)); }
+function toggleFavorite(id, ev){
+  if(ev) ev.stopPropagation();
+  const sid=String(id); let favs=getFavorites();
+  favs = favs.includes(sid) ? favs.filter(x=>x!==sid) : favs.concat([sid]);
+  saveFavorites(favs); render();
+}
+function getNotes(){ return safeJSON(NOTES_KEY, {}); }
+function saveNotes(notes){ localStorage.setItem(NOTES_KEY, JSON.stringify(notes)); }
+function addContactNote(id){
+  const txt=document.getElementById('new-note-text')?.value.trim();
+  if(!txt){ alert('Veuillez écrire une note.'); return; }
+  const notes=getNotes(); const sid=String(id);
+  if(!Array.isArray(notes[sid])) notes[sid]=[];
+  notes[sid].unshift({id:'n'+Date.now(), date:new Date().toLocaleString('fr-CA'), text:txt});
+  saveNotes(notes); renderContactNotes(id);
+}
+function deleteContactNote(id,noteId){
+  if(!confirm('Supprimer cette note ?')) return;
+  const notes=getNotes(); const sid=String(id);
+  notes[sid]=(notes[sid]||[]).filter(n=>n.id!==noteId);
+  saveNotes(notes); renderContactNotes(id);
+}
+function renderContactNotes(id){
+  const body=document.querySelector('#view-content .view-body'); if(!body) return;
+  const old=document.getElementById('notes-intervention-section'); if(old) old.remove();
+  const notes=(getNotes()[String(id)]||[]);
+  const section=document.createElement('div'); section.className='view-section'; section.id='notes-intervention-section';
+  section.innerHTML=`<div class="view-section-title">Notes d'intervention</div><div>${notes.length?notes.map(n=>`<div class="notes-box"><div class="note-date">${esc(n.date||'')}</div><div class="note-text">${esc(n.text||'')}</div><div style="margin-top:6px"><button class="btn btn-sm btn-danger" onclick="deleteContactNote(${id},'${esc(n.id)}')">🗑 Supprimer</button></div></div>`).join(''):'<div class="view-field-value empty">Aucune note pour ce contact.</div>'}<textarea id="new-note-text" class="note-editor" placeholder="Ajouter une note d’intervention..."></textarea><button class="btn btn-sm btn-primary" style="margin-top:8px" onclick="addContactNote(${id})">＋ Ajouter une note</button></div>`;
+  body.appendChild(section);
+}
+function copyTextValue(v){
+  const text=String(v||'').trim(); if(!text) return;
+  if(navigator.clipboard){ navigator.clipboard.writeText(text).then(()=>alert('Copié : '+text)); }
+  else{ const ta=document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); alert('Copié : '+text); }
+}
+function enhanceViewActions(){
+  document.querySelectorAll('#view-content .view-field').forEach(field=>{
+    const label=(field.querySelector('.view-field-label')?.textContent||'').toLowerCase();
+    const valEl=field.querySelector('.view-field-value'); if(!valEl || valEl.classList.contains('empty')) return;
+    const value=(valEl.textContent||'').trim(); if(!value || value==='—' || value==='Non renseigné') return;
+    if(valEl.querySelector('.view-actions-inline')) return;
+    const actions=document.createElement('span'); actions.className='view-actions-inline';
+    const canCopy=['dossier','matricule','poste','tél','tel','cellulaire','courriel'].some(k=>label.includes(k));
+    const isPhone=['tél','tel','cellulaire','poste'].some(k=>label.includes(k));
+    const isEmail=label.includes('courriel');
+    if(isPhone){ const a=document.createElement('a'); a.className='mini-action'; a.href='tel:'+value.replace(/[^0-9+]/g,''); a.textContent='📞 Appeler'; actions.appendChild(a); }
+    if(isEmail){ const a=document.createElement('a'); a.className='mini-action'; a.href='mailto:'+value; a.textContent='📧 Courriel'; actions.appendChild(a); }
+    if(canCopy){ const b=document.createElement('button'); b.type='button'; b.className='mini-action'; b.textContent='📋 Copier'; b.onclick=()=>copyTextValue(value); actions.appendChild(b); }
+    if(actions.children.length) valEl.appendChild(actions);
+  });
+  document.querySelectorAll('#view-content .view-hero-info').forEach(info=>{
+    const val=info.querySelector('.view-hero-info-value')?.textContent?.trim();
+    const lab=info.querySelector('.view-hero-info-label')?.textContent?.trim().toLowerCase();
+    if(!val || info.querySelector('.mini-action')) return;
+    const b=document.createElement('button'); b.type='button'; b.className='mini-action'; b.textContent='📋'; b.title='Copier'; b.onclick=()=>copyTextValue(val); info.appendChild(b);
+    if(lab==='tel'){ const a=document.createElement('a'); a.className='mini-action'; a.href='tel:'+val.replace(/[^0-9+]/g,''); a.textContent='📞'; info.appendChild(a); }
+  });
+}
+function printContactFromList(id){ viewingId=id; printCurrentContactPDF(); }
+function printCurrentContactPDF(){
+  if(viewingId==null){ return; }
+  const c=contacts.find(x=>x.id===viewingId); if(!c) return;
+  const win=window.open('', '_blank');
+  if(!win){ alert('Veuillez autoriser les fenêtres surgissantes pour générer le PDF.'); return; }
+  const rows=[['Nom', (c.nom||'')+' '+(c.prenom||'')],['Type',c.type],['Unité',c.unite],['Chambre/No poste',c.chambreNo],['Dossier No',c.dossierNo],['Diagnostic',c.diagnostic],['Mobilité',c.mobilite],['Date naissance',c.ddn],['Mat Educ',c.educateurMatricule],['Educ',c.educateur],['Poste éducateur',c.educateurPoste],['Tel éducateur',c.educateurCellulaire],['Poste/Fonction',c.poste],['Téléphone/Poste',c.telPoste],['Cellulaire',c.cellulaire],['Représentant',c.representant],['Cellulaire représentant',c.cellRepresentant],['Courriel',c.courriel],['Adresse',c.adresse]].filter(r=>String(r[1]||'').trim()!=='');
+  const notes=(getNotes()[String(c.id)]||[]);
+  const css='<style>body{font-family:Arial,sans-serif;margin:24px;color:#111}h1{font-size:24px}table{width:100%;border-collapse:collapse;margin-top:12px}td{border:1px solid #ddd;padding:8px;vertical-align:top}td:first-child{font-weight:bold;background:#f5f5f5;width:180px}.note{border:1px solid #ddd;padding:8px;margin-top:8px}@media print{button{display:none}}</style>';
+  win.document.write(`<html><head><meta charset="UTF-8"><title>Fiche contact</title>${css}</head><body><button onclick="window.print()" style="margin-bottom:12px;padding:8px 12px">Imprimer / Enregistrer en PDF</button><h1>${esc(c.nom||'')} ${esc(c.prenom||'')}</h1><table>${rows.map(r=>`<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td></tr>`).join('')}</table><h2>Notes d'intervention</h2>${notes.length?notes.map(n=>`<div class="note"><strong>${esc(n.date||'')}</strong><br>${esc(n.text||'')}</div>`).join(''):'<p>Aucune note.</p>'}<script>window.onload=function(){setTimeout(function(){window.print()},300)}<\/script></body></html>`);
+  win.document.close();
+}
+
+function render(){
+  const q=(document.getElementById('search').value||'').toLowerCase(), ft=document.getElementById('filter-type').value, fu=document.getElementById('filter-unite').value, fm=document.getElementById('filter-mob').value;
+  let list=contacts.filter(c=>{const t=[c.nom,c.prenom,c.persDescp,c.unite,c.diagnostic,c.dossierNo,c.chambreNo,c.poste,c.telPoste,c.cellulaire,c.representant,c.cellRepresentant,c.matricule,c.educateurMatricule,c.educateur,c.educateurPoste,c.educateurCellulaire,c.adresse,c.courriel,c.type].join(' ').toLowerCase();return(!q||t.includes(q))&&(!ft||c.type===ft)&&(!fu||c.unite===fu)&&(!fm||c.mobilite===fm);});
+  if(sortField){list.sort((a,b)=>{const av=String(a[sortField]||''),bv=String(b[sortField]||'');return sortAsc?av.localeCompare(bv):bv.localeCompare(av);});}
+  list.sort((a,b)=>(isFavorite(b.id)?1:0)-(isFavorite(a.id)?1:0));
+  document.getElementById('stat-total').textContent=contacts.length; document.getElementById('stat-res').textContent=contacts.filter(c=>c.type==='Résident').length; document.getElementById('stat-pers').textContent=contacts.filter(c=>c.type==='Personnel').length; document.getElementById('stat-autres').textContent=contacts.filter(c=>c.type==='Autres').length; updateStatCardsActive(ft);
+  const unites=[...new Set(contacts.map(c=>c.unite).filter(Boolean))].sort(); const sel=document.getElementById('filter-unite'); const cur=sel.value; sel.innerHTML='<option value="">Toutes les unités</option>'+unites.map(u=>`<option value="${esc(u)}"${u===cur?' selected':''}>${esc(u)}</option>`).join('');
+  const tbody=document.getElementById('contacts-body'), empty=document.getElementById('empty-state'); if(!list.length){tbody.innerHTML='';empty.style.display='block';return;} empty.style.display='none';
+  const isAdmin=currentUser&&currentUser.role==='admin';
+  tbody.innerHTML=list.map(c=>`<tr><td><div class="name-cell"><button class="favorite-btn" onclick="toggleFavorite(${c.id},event)" title="Favori">${isFavorite(c.id)?'⭐':'☆'}</button><div class="avatar">${initials(c.prenom,c.nom)}</div><div style="font-weight:600">${esc(c.nom||'')} ${esc(c.prenom||'')}</div></div></td><td>${typeBadge(c.type)}</td><td>${esc(c.unite||'—')}</td><td>${mobBadge(c.mobilite)}</td><td>${c.type==='Résident'?fmtDateAge(c.ddn):fmtDate(c.ddn)}</td><td>${esc(c.poste||'—')}</td><td style="font-family:monospace;font-size:12px">${esc(c.cellulaire||c.telPoste||'—')}</td><td><div class="actions"><button class="btn btn-sm btn-view" onclick="openView(${c.id})" title="Afficher la fiche">👁</button><button class="btn btn-sm" onclick="printContactFromList(${c.id})" title="PDF">📄</button><button class="btn btn-sm" onclick="openModal(${c.id})" title="Modifier">✏️</button>${isAdmin?`<button class="btn btn-sm btn-danger" onclick="deleteContact(${c.id})" title="Supprimer">🗑</button>`:''}</div></td></tr>`).join('');
+}
+function sortBy(f){if(sortField===f)sortAsc=!sortAsc;else{sortField=f;sortAsc=true;}render();}
+function openModal(id=null){
+  editingId=id; const c=id?contacts.find(x=>x.id===id):{}; document.getElementById('modal-title').textContent=id?'Modifier le contact':'Nouveau contact';
+  ['prenom','nom','persDescp','unite','diagnostic','dossierNo','chambreNo','ddn','educateurMatricule','educateur','educateurPoste','educateurCellulaire','poste','telPoste','cellulaire','representant','cellRepresentant','matricule','adresse','courriel'].forEach(f=>{const el=document.getElementById('f-'+f); if(el) el.value=c[f]||'';});
+  document.getElementById('f-mobilite').value=c.mobilite||''; document.getElementById('f-type').value=c.type||''; toggleMedSection(); fillEducateurFromMatricule(); document.getElementById('modal-overlay').classList.add('open');
+}
+function closeModal(){document.getElementById('modal-overlay').classList.remove('open');editingId=null;}
+function saveContact(){
+  const g=id=>document.getElementById(id)?.value.trim()||''; const nom=g('f-nom'), prenom=g('f-prenom'), type=g('f-type');
+  if(!nom&&!prenom){alert('Veuillez saisir au moins un Nom ou un Prénom.');return;} if(!type){alert('Veuillez sélectionner un Type.');return;}
+  const isPersonnel=type==='Personnel'; const isResident=type==='Résident'; const isAutres=type==='Autres'; const data={prenom,nom,type,persDescp:g('f-persDescp'),unite:isAutres?'':g('f-unite'),diagnostic:isResident?g('f-diagnostic'):'',dossierNo:isResident?g('f-dossierNo'):'',mobilite:isResident?document.getElementById('f-mobilite').value:'',chambreNo:isAutres?'':g('f-chambreNo'),ddn:isResident?g('f-ddn'):'',educateurMatricule:isResident?g('f-educateurMatricule'):'',educateur:isResident?g('f-educateur'):'',educateurPoste:isResident?g('f-educateurPoste'):'',educateurCellulaire:isResident?g('f-educateurCellulaire'):'',poste:g('f-poste'),telPoste:g('f-telPoste'),cellulaire:g('f-cellulaire'),representant:isResident?g('f-representant'):'',cellRepresentant:isResident?g('f-cellRepresentant'):'',matricule:isPersonnel?g('f-matricule'):'',adresse:isAutres?g('f-adresse'):'',courriel:(isPersonnel||isAutres)?g('f-courriel'):''};
+  let before=null, after=null, action='CRÉATION';
+  if(editingId){const i=contacts.findIndex(x=>x.id===editingId); before=clone(contacts[i]); contacts[i]={...contacts[i],...data}; after=clone(contacts[i]); action='MODIFICATION';}
+  else{data.id=Date.now(); contacts.push(data); after=clone(data);}
+  saveC(); closeModal(); render(); logHistory(action,'Contact',before,after,fieldDiff(before,after,trackedContactFields));
+}
+function deleteContact(id){
+  if(!currentUser||currentUser.role!=='admin'){alert('Action réservée aux administrateurs.');return;}
+  const before=clone(contacts.find(c=>c.id===id)); if(!before)return;
+  if(confirm('Supprimer ce contact définitivement ?')){contacts=contacts.filter(x=>x.id!==id);saveC();render();logHistory('SUPPRESSION','Contact',before,null,fieldDiff(before,null,trackedContactFields));}
+}
+
+// ═══ VIEW CONTACT ═══
+function openView(id){
+  viewingId=id; const c=contacts.find(x=>x.id===id); if(!c)return;
+  const isResident=c.type==='Résident'; const isPersonnel=c.type==='Personnel'; const isAutres=c.type==='Autres';
+  const f=(v,empty='—')=>v?esc(v):`<span class="empty">${empty}</span>`;
+  const ddnValue = c.ddn ? `${fmtDate(c.ddn)} (${calcAge(c.ddn)} ans)` : '<span class="empty">Non renseigné</span>';
+  const localisationSection = isAutres ? '' : `<div class="view-section"><div class="view-section-title">Localisation</div><div class="view-grid"><div class="view-field"><div class="view-field-label">Unité</div><div class="view-field-value ${!c.unite?'empty':''}">${f(c.unite,'Non renseigné')}</div></div><div class="view-field"><div class="view-field-label">${isPersonnel?'No de poste':'Chambre No'}</div><div class="view-field-value ${!c.chambreNo?'empty':''}">${f(c.chambreNo,'Non renseigné')}</div></div></div></div>`;
+  const headerEducateurItems = isResident ? [
+    ['Mat Educ', c.educateurMatricule],
+    ['Educ', c.educateur],
+    ['Poste', c.educateurPoste],
+    ['Tel', c.educateurCellulaire]
+  ].filter(item => String(item[1] ?? '').trim() !== '') : [];
+  const headerEducateurInfo = headerEducateurItems.length ? `<div class="view-hero-educateur">${headerEducateurItems.map(item=>`<div class="view-hero-info"><span class="view-hero-info-label">${esc(item[0])}</span><span class="view-hero-info-value">${esc(item[1])}</span></div>`).join('')}</div>` : '';
+  document.getElementById('view-content').innerHTML=`<div class="view-hero"><div class="view-hero-name">${esc(c.nom||'')}<br>${esc(c.prenom||'')}</div><div class="view-hero-badges">${c.type?`<span class="view-badge">${esc(c.type)}</span>`:''}${(!isAutres&&c.unite)?`<span class="view-badge">Unité ${esc(c.unite)}</span>`:''}${(!isAutres&&c.chambreNo)?`<span class="view-badge">${isPersonnel?'No de poste':'Chambre'} ${esc(c.chambreNo)}</span>`:''}${isResident&&c.telPoste?`<span class="view-badge">No de poste ${esc(c.telPoste)}</span>`:''}${isPersonnel&&c.matricule?`<span class="view-badge">Matricule ${esc(c.matricule)}</span>`:''}${isPersonnel&&c.cellulaire?`<span class="view-badge">📱 ${esc(c.cellulaire)}</span>`:''}${isPersonnel&&c.courriel?`<span class="view-badge">✉ ${esc(c.courriel)}</span>`:''}${isAutres&&c.telPoste?`<span class="view-badge">☎ ${esc(c.telPoste)}</span>`:''}${isAutres&&c.cellulaire?`<span class="view-badge">📱 ${esc(c.cellulaire)}</span>`:''}${isAutres&&c.adresse?`<span class="view-badge">Adresse ${esc(c.adresse)}</span>`:''}${isAutres&&c.courriel?`<span class="view-badge">✉ ${esc(c.courriel)}</span>`:''}${c.mobilite?`<span class="view-badge">${esc(c.mobilite)}</span>`:''}</div>${headerEducateurInfo}</div><div class="view-body"><div class="view-section"><div class="view-section-title">Identification</div><div class="view-grid"><div class="view-field"><div class="view-field-label">Prénom</div><div class="view-field-value">${f(c.prenom)}</div></div><div class="view-field"><div class="view-field-label">Nom</div><div class="view-field-value">${f(c.nom)}</div></div><div class="view-field"><div class="view-field-label">Type</div><div class="view-field-value">${f(c.type)}</div></div><div class="view-field"><div class="view-field-label">Pers Descp</div><div class="view-field-value ${!c.persDescp?'empty':''}">${f(c.persDescp,'Non renseigné')}</div></div></div></div>${localisationSection}${isResident?`<div class="view-section"><div class="view-section-title">Informations médicales</div><div class="view-grid"><div class="view-field full"><div class="view-field-label">Diagnostic</div><div class="view-field-value ${!c.diagnostic?'empty':''}">${f(c.diagnostic,'Non renseigné')}</div></div><div class="view-field"><div class="view-field-label">Dossier No</div><div class="view-field-value ${!c.dossierNo?'empty':''}">${f(c.dossierNo,'Non renseigné')}</div></div><div class="view-field"><div class="view-field-label">Mobilité</div><div class="view-field-value ${!c.mobilite?'empty':''}">${f(c.mobilite,'Non renseigné')}</div></div><div class="view-field"><div class="view-field-label">Date de naissance / Âge</div><div class="view-field-value ${!c.ddn?'empty':''}">${ddnValue}</div></div></div></div>`:`<div class="view-section"><div class="view-section-title">Informations médicales</div><div class="locked-section">🚫 Non applicable — Contact de type <strong style="margin-left:4px">${esc(c.type||'sélectionné')}</strong></div></div>`}<div class="view-section"><div class="view-section-title">Contact &amp; représentation</div><div class="view-grid"><div class="view-field"><div class="view-field-label">Poste / Fonction</div><div class="view-field-value ${!c.poste?'empty':''}">${f(c.poste,'Non renseigné')}</div></div>${isPersonnel?`<div class="view-field"><div class="view-field-label">Matricule</div><div class="view-field-value ${!c.matricule?'empty':''}">${f(c.matricule,'Non renseigné')}</div></div>`:''}<div class="view-field"><div class="view-field-label">No Tél / Poste</div><div class="view-field-value ${!c.telPoste?'empty':''}">${f(c.telPoste,'Non renseigné')}</div></div><div class="view-field"><div class="view-field-label">Cellulaire personnel</div><div class="view-field-value ${!c.cellulaire?'empty':''}">${f(c.cellulaire,'Non renseigné')}</div></div>${(isPersonnel||isAutres)?`<div class="view-field full"><div class="view-field-label">Courriel</div><div class="view-field-value ${!c.courriel?'empty':''}">${f(c.courriel,'Non renseigné')}</div></div>`:''}${isResident?`<div class="view-field"><div class="view-field-label">Représentant</div><div class="view-field-value ${!c.representant?'empty':''}">${f(c.representant,'Non renseigné')}</div></div><div class="view-field full"><div class="view-field-label">Cellulaire représentant</div><div class="view-field-value ${!c.cellRepresentant?'empty':''}">${f(c.cellRepresentant,'Non renseigné')}</div></div>`:''}${isAutres?`<div class="view-field full"><div class="view-field-label">Adresse</div><div class="view-field-value ${!c.adresse?'empty':''}">${f(c.adresse,'Non renseigné')}</div></div>`:''}</div></div></div>`;
+  setupViewDropdown();
+  renderContactNotes(id);
+  setupViewDropdown();
+  enhanceViewActions();
+  document.getElementById('view-overlay').classList.add('open');
+}
+
+function setupViewDropdown(){
+  const body=document.querySelector('#view-content .view-body');
+  if(!body) return;
+  const sections=[...body.querySelectorAll('.view-section')];
+  if(!sections.length) return;
+  const old=body.querySelector('.view-dropdown-bar');
+  if(old) old.remove();
+  const bar=document.createElement('div');
+  bar.className='view-dropdown-bar';
+  const label=document.createElement('label');
+  label.textContent='Afficher';
+  const select=document.createElement('select');
+  select.id='view-section-select';
+  select.innerHTML='<option value="">Toute la fiche</option>'+sections.map((s,i)=>{
+    const title=(s.querySelector('.view-section-title')?.textContent||('Section '+(i+1))).trim();
+    s.setAttribute('data-view-title', title);
+    return `<option value="${esc(title)}">${esc(title)}</option>`;
+  }).join('');
+  select.onchange=function(){
+    const val=this.value;
+    sections.forEach(s=>{
+      const title=s.getAttribute('data-view-title')||'';
+      s.style.display=(!val || title===val)?'block':'none';
+    });
+  };
+  bar.appendChild(label);
+  bar.appendChild(select);
+  body.insertBefore(bar, body.firstChild);
+}
+
+function closeView(){document.getElementById('view-overlay').classList.remove('open');viewingId=null;}
+function switchToEdit(){const id=viewingId; closeView(); if(id!=null)openModal(id);}
+function exportHeaders(){
+  return ['Prénom','Nom','Type','Pers Descp','Unité','Diagnostic','Dossier No','Mobilité','Chambre No / No de poste','DDN','Matricule de l’éducateur','Éducateur','No de Poste','Cellulaire éducateur','Poste / Fonction','No Tél / Poste','Cellulaire personnel','Représentant','Cellulaire représentant','Matricule','Adresse','Courriel'];
+}
+function exportRows(){
+  return contacts.map(c=>[c.prenom,c.nom,c.type,c.persDescp,c.unite,c.diagnostic,c.dossierNo,c.mobilite,c.chambreNo,c.ddn,c.educateurMatricule,c.educateur,c.educateurPoste,c.educateurCellulaire,c.poste,c.telPoste,c.cellulaire,c.representant,c.cellRepresentant,c.matricule,c.adresse,c.courriel]);
+}
+function toggleExportMenu(){
+  const menu=document.getElementById('export-menu');
+  if(menu) menu.classList.toggle('open');
+}
+function closeExportMenu(){
+  const menu=document.getElementById('export-menu');
+  if(menu) menu.classList.remove('open');
+}
+document.addEventListener('click', function(e){
+  const wrap=e.target.closest && e.target.closest('.export-menu-wrap');
+  if(!wrap) closeExportMenu();
+});
+function exportExcel(){
+  const h=exportHeaders(), rows=exportRows();
+  const cell=v=>`<td>${esc(v||'')}</td>`;
+  const html=`<html><head><meta charset="UTF-8"></head><body><table border="1"><thead><tr>${h.map(x=>`<th>${esc(x)}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(cell).join('')}</tr>`).join('')}</tbody></table></body></html>`;
+  const blob=new Blob(['\ufeff'+html],{type:'application/vnd.ms-excel;charset=utf-8;'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='contacts.xls'; a.click(); URL.revokeObjectURL(a.href);
+}
+function exportPDF(){
+  const h=exportHeaders(), rows=exportRows();
+  const win=window.open('', '_blank');
+  if(!win){ alert('Veuillez autoriser les fenêtres surgissantes pour exporter en PDF.'); return; }
+  const css=`<style>body{font-family:Arial,sans-serif;margin:24px;color:#111}h1{font-size:20px;margin-bottom:6px}.date{font-size:12px;color:#666;margin-bottom:16px}table{width:100%;border-collapse:collapse;font-size:10px}th,td{border:1px solid #ddd;padding:5px;text-align:left;vertical-align:top}th{background:#f3f3f3}@media print{button{display:none}body{margin:10mm}}
+/* PRO VIEW COMPACT + SCROLL */
+#view-overlay .modal{max-height:92vh;display:flex;flex-direction:column}
+#view-content{display:flex;flex-direction:column;min-height:0}
+#view-content .view-hero{flex:0 0 auto;padding:24px 24px 18px}
+#view-content .view-body{overflow-y:auto;max-height:52vh;padding-right:18px;scrollbar-width:thin}
+#view-content .view-body::-webkit-scrollbar{width:8px}
+#view-content .view-body::-webkit-scrollbar-thumb{background:#cfcfcf;border-radius:10px}
+#view-content .view-hero-avatar{display:none!important}
+.view-actions-inline{display:inline-flex;gap:5px;margin-left:8px;vertical-align:middle;flex-wrap:wrap}
+.mini-action{border:1px solid #ddd;background:#fff;border-radius:6px;padding:2px 6px;font-size:11px;cursor:pointer;text-decoration:none;color:#1a1a1a;display:inline-flex;align-items:center;gap:3px}
+.mini-action:hover{background:#f5f5f3}
+.favorite-btn{border:none;background:transparent;cursor:pointer;font-size:16px;margin-right:5px;vertical-align:middle}
+.notes-box{background:#fafafa;border:1px solid #eee;border-radius:8px;padding:10px;margin-bottom:8px}
+.note-date{font-size:11px;color:#888;margin-bottom:4px;font-weight:600}
+.note-text{font-size:13px;white-space:pre-wrap;line-height:1.45}
+.note-editor{width:100%;min-height:70px;border:1px solid #ddd;border-radius:8px;padding:8px;font-family:inherit;font-size:13px;resize:vertical;margin-top:8px}
+
+</style>`;
+  win.document.write(`<html><head><meta charset="UTF-8"><title>Contacts PDF</title>${css}</head><body><button onclick="window.print()" style="margin-bottom:12px;padding:8px 12px">Imprimer / Enregistrer en PDF</button><h1>Base de contacts</h1><div class="date">Exporté le ${new Date().toLocaleString('fr-CA')}</div><table><thead><tr>${h.map(x=>`<th>${esc(x)}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(v=>`<td>${esc(v||'')}</td>`).join('')}</tr>`).join('')}</tbody></table><script>window.onload=function(){setTimeout(function(){window.print()},300)}<\/script></body></html>`);
+  win.document.close();
+}
+function exportCSV(){ exportExcel(); }
+
+// ═══ USERS ═══
+function renderUsers(){
+  const list=document.getElementById('users-list'); if(!list)return;
+  list.innerHTML=appUsers.map(u=>`<div class="user-card"><div class="user-avatar ${u.role}">${esc((u.fullname||u.username)[0].toUpperCase())}</div><div class="user-info"><div class="user-name">${esc(u.fullname||u.username)}${u.id===currentUser?.id?'<span class="self-badge">vous</span>':''}</div><div class="user-meta">@${esc(u.username)}</div></div><span class="role-badge role-${u.role}">${u.role==='admin'?'Administrateur':'Utilisateur'}</span><button class="btn btn-sm btn-warning" onclick="openAdminPwd('${u.id}')" title="Réinitialiser le mot de passe sans le voir">🔑</button>${u.username!=='admin'&&u.id!==currentUser?.id?`<button class="btn btn-sm btn-danger" onclick="deleteUser('${u.id}')">🗑</button>`:''}</div>`).join('');
+}
+function openUserModal(){['u-prenom','u-nom','u-username'].forEach(id=>document.getElementById(id).value='');document.getElementById('u-role').value='user';document.getElementById('user-modal-overlay').classList.add('open');}
+function closeUserModal(){document.getElementById('user-modal-overlay').classList.remove('open');}
+function saveUser(){
+  const prenomUser=document.getElementById('u-prenom').value.trim();
+  const nomUser=document.getElementById('u-nom').value.trim();
+  const username=document.getElementById('u-username').value.trim();
+  const role=document.getElementById('u-role').value;
+  if(!prenomUser){alert('Le prénom est requis.');return;}
+  if(!nomUser){alert('Le nom est requis.');return;}
+  if(!username){alert("Le nom d'utilisateur est requis.");return;}
+  if(username.length<6){alert("Le nom d'utilisateur doit contenir au moins 6 caractères, car il servira de mot de passe temporaire.");return;}
+  if(appUsers.find(u=>u.username===username)){alert("Ce nom d'utilisateur existe déjà.");return;}
+  const fullname=[prenomUser,nomUser].join(' ');
+  const user={id:'u'+Date.now(),prenomUser,nomUser,username,password:username,role,fullname,mustChangePassword:true,created:Date.now()};
+  appUsers.push(user); saveU(); closeUserModal(); renderUsers();
+  logHistory('CRÉATION','Utilisateur',null,clone(user),fieldDiff(null,user,trackedUserFields).concat([{champ:'Mot de passe temporaire',avant:'—',apres:"Identique au nom d'utilisateur"}]));
+}
+function deleteUser(id){
+  const u=appUsers.find(x=>x.id===id); if(!u)return; if(confirm(`Supprimer le compte "${u.username}" ?`)){const before=clone(u); appUsers=appUsers.filter(x=>x.id!==id); saveU(); renderUsers(); logHistory('SUPPRESSION','Utilisateur',before,null,fieldDiff(before,null,trackedUserFields));}
+}
+
+// ═══ HISTORY ═══
+function validateAdminPasswordForRestore(){
+  const username=prompt("Validation administrateur requise. Entrez le nom d’utilisateur admin :");
+  if(username===null) return false;
+  const password=prompt("Entrez le mot de passe administrateur :");
+  if(password===null) return false;
+  const admin=appUsers.find(u=>u.username===username.trim() && u.password===password && u.role==='admin');
+  if(!admin){alert('Validation refusée : nom d’utilisateur ou mot de passe administrateur incorrect.');return false;}
+  return true;
+}
+
+function detailHTML(details){
+  if(!details||!details.length)return '<span style="color:#999">Aucun champ modifié</span>';
+  return `<div class="history-detail">${details.map(d=>`<div class="hist-field"><div class="hist-label">${esc(d.champ)}</div><span class="hist-before">Avant: ${esc(d.avant)}</span> → <span class="hist-after">Après: ${esc(d.apres)}</span></div>`).join('')}</div>`;
+}
+function renderHistory(){
+  const body=document.getElementById('history-body'); if(!body)return;
+  const q=(document.getElementById('history-search')?.value||'').toLowerCase().trim();
+  let list=historyLog.slice().reverse();
+  if(q){
+    list=list.filter(h=>{
+      const detailsText=(h.details||[]).map(d=>[d.champ,d.avant,d.apres].join(' ')).join(' ');
+      return [h.date,h.heure,h.utilisateur,h.username,h.section,h.action,h.cible,detailsText].join(' ').toLowerCase().includes(q);
+    });
+  }
+  if(!list.length){body.innerHTML='<tr><td colspan="6" class="empty">Aucun historique trouvé</td></tr>';return;}
+  body.innerHTML=list.map(h=>{
+    const canRestore = h.section==='Contact' && (h.avant || h.apres);
+    const restoreLabel = h.action==='SUPPRESSION' ? '↩ Restaurer la suppression' : '↩ Restaurer';
+    const restoreTitle = h.action==='SUPPRESSION' ? 'Restaurer un contact supprimé avec validation admin' : 'Restaurer les données Avant';
+    const restoreBtn = canRestore
+      ? `<button class="btn btn-sm btn-warning" onclick="restoreHistory('${esc(h.id)}')" title="${restoreTitle}">${restoreLabel}</button>`
+      : `<span style="color:#bbb;font-size:12px">—</span>`;
+    return `<tr><td style="text-align:center"><input type="checkbox" class="history-select" value="${esc(h.id)}"></td><td>${esc(h.date||'')}<br><span style="color:#888;font-size:11px">${esc(h.heure||'')}</span></td><td>${esc(h.utilisateur||h.user||'')}</td><td><strong>${esc(h.action||'')}</strong><br><span style="color:#888;font-size:11px">${esc(h.section||'')} ${h.cible?'· '+esc(h.cible):''}</span></td><td>${detailHTML(h.details)}</td><td>${restoreBtn}</td></tr>`;
+  }).join('');
+}
+function restoreHistory(historyId){
+  if(!currentUser||currentUser.role!=='admin'){alert('Action réservée aux administrateurs.');return;}
+  const h=historyLog.find(x=>x.id===historyId);
+  if(!h){alert('Historique introuvable.');return;}
+  if(h.section!=='Contact'){alert('La restauration est disponible seulement pour les contacts.');return;}
+  if(h.action==='SUPPRESSION' && !validateAdminPasswordForRestore()) return;
+  if(!confirm(h.action==='SUPPRESSION' ? 'Restaurer ce contact supprimé ?' : 'Restaurer les données AVANT cette modification ?')) return;
+
+  let beforeCurrent=null, restored=null;
+
+  // Si l'historique était une création, restaurer “avant” veut dire supprimer le contact créé.
+  if(!h.avant && h.apres && h.apres.id){
+    const existing=contacts.find(c=>String(c.id)===String(h.apres.id));
+    beforeCurrent=clone(existing);
+    contacts=contacts.filter(c=>String(c.id)!==String(h.apres.id));
+    saveC(); render();
+    logHistory('RESTAURATION - ANNULATION CRÉATION','Contact',beforeCurrent,null,fieldDiff(beforeCurrent,null,trackedContactFields));
+    renderHistory();
+    alert('La création a été annulée.');
+    return;
+  }
+
+  if(!h.avant || !h.avant.id){alert('Aucune donnée “Avant” disponible pour cette ligne.');return;}
+  restored=clone(h.avant);
+  const idx=contacts.findIndex(c=>String(c.id)===String(restored.id));
+  beforeCurrent=idx>=0?clone(contacts[idx]):null;
+  if(idx>=0) contacts[idx]={...contacts[idx],...restored};
+  else contacts.push(restored);
+  saveC(); render();
+  logHistory('RESTAURATION','Contact',beforeCurrent,clone(restored),fieldDiff(beforeCurrent,restored,trackedContactFields));
+  renderHistory();
+  alert('Les données ont été restaurées.');
+}
+function exportHistoryCSV(){
+  const h=['Date','Heure','Utilisateur','Section','Action','Cible','Champ','Avant','Après'];
+  const rows=[]; historyLog.forEach(x=>{(x.details&&x.details.length?x.details:[{champ:'',avant:'',apres:''}]).forEach(d=>rows.push([x.date,x.heure,x.utilisateur,x.section,x.action,x.cible,d.champ,d.avant,d.apres].map(v=>`"${String(v||'').replace(/"/g,'""')}"`).join(',')));});
+  const csv='\uFEFF'+[h.join(','),...rows].join('\n'); const a=document.createElement('a'); a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv); a.download='historique_modifications.csv'; a.click();
+}
+function getSelectedHistoryIds(){
+  return Array.from(document.querySelectorAll('.history-select:checked')).map(cb=>cb.value);
+}
+function toggleSelectAllHistory(btn){
+  const boxes=Array.from(document.querySelectorAll('.history-select'));
+  if(!boxes.length){alert('Aucune ligne d’historique à sélectionner.');return;}
+  const shouldCheck=boxes.some(cb=>!cb.checked);
+  boxes.forEach(cb=>cb.checked=shouldCheck);
+  if(btn) btn.textContent=shouldCheck?'☐ Tout désélectionner':'☑ Tout sélectionner';
+}
+function deleteSelectedHistory(){
+  if(!currentUser||currentUser.role!=='admin'){
+    alert('Action réservée aux administrateurs.');
+    return;
+  }
+  const ids=getSelectedHistoryIds();
+  if(!ids.length){alert('Veuillez sélectionner au moins une ligne d’historique.');return;}
+  const selected=historyLog.filter(h=>ids.includes(h.id));
+  const hasSuppression=selected.some(h=>h.action==='SUPPRESSION');
+  if(hasSuppression){
+    alert('La sélection contient une ou plusieurs actions SUPPRESSION. Une validation par mot de passe administrateur est obligatoire pour supprimer ces lignes de l’historique.');
+    if(!validateAdminPasswordForRestore()) return;
+  }
+  if(!confirm('Supprimer définitivement les lignes d’historique sélectionnées ?')) return;
+  historyLog=historyLog.filter(h=>!ids.includes(h.id));
+  saveH();
+  renderHistory();
+  alert('Les lignes sélectionnées ont été supprimées de l’historique.');
+}
+function clearHistory(){
+  if(!currentUser||currentUser.role!=='admin'){
+    alert('Action réservée aux administrateurs.');
+    return;
+  }
+
+  const hasSuppression = historyLog.some(h => h.action === 'SUPPRESSION');
+  if(hasSuppression){
+    alert('Attention : l’historique contient une ou plusieurs actions SUPPRESSION. Une validation par mot de passe administrateur est obligatoire pour vider ces lignes.');
+    if(!validateAdminPasswordForRestore()) return;
+  }
+
+  if(confirm('Vider tout l’historique ?')){
+    historyLog=[];
+    saveH();
+    renderHistory();
+  }
+}
+
+// ═══ NAV ═══
+function showPage(id,el){
+  if(currentUser?.mustChangePassword){openMandatoryPasswordChange();return;}
+  if(id==='users'&&(!currentUser||currentUser.role!=='admin'))return;
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active')); document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active'); el.classList.add('active'); if(id==='history')renderHistory();
+}
+function toggleGuide(h){h.nextElementSibling.classList.toggle('open');}
+
+function bindEvents(){
+  document.getElementById('login-pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+  document.getElementById('login-user').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('login-pass').focus();});
+  ['modal-overlay','view-overlay','user-modal-overlay','myaccount-overlay','recovery-overlay','admin-pwd-overlay'].forEach(id=>{const el=document.getElementById(id); if(el)el.addEventListener('click',function(e){if(e.target===this){ if(this.id==='myaccount-overlay'&&currentUser?.mustChangePassword){alert('Vous devez modifier votre mot de passe avant de continuer.');return;} this.classList.remove('open');}});});
+}
+
+initData(); bindEvents(); renderHistory();
+</script>
+</body>
+</html>
